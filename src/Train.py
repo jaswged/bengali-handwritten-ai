@@ -33,7 +33,7 @@ seed_everything(SEED)
 model = ResNet().to(device)
 
 # Setup data files to load
-data_dir = '../input/bengaliai-cv19'
+data_dir = '../data'
 files_train = [f'train_image_data_{fid}.parquet' for fid in range(4)]
 
 # Predict Test values
@@ -42,6 +42,48 @@ row_id = []
 target = []
 
 # Do training here
+parquet_df0 = pd.read_parquet('../data/train_image_data_0.parquet',
+                              engine='pyarrow')
+print(parquet_df0.shape)
+
+# Get image dataset from train df
+train_images = BengaliDataset(parquet_df0, img_height=HEIGHT,
+                              img_width=WIDTH)
+
+# Define loss function
+loss_fn = torch.nn.MSELoss(reduction='sum')
+
+learning_rate = 1e-4
+
+optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
+x = torch.randn(64, 1000)
+y = torch.randn(64, 10)
+
+for t in range(500):
+    # Forward pass: compute predicted y by passing x to the model.
+    y_pred = model(x)
+
+    # Compute and print loss.
+    loss = loss_fn(y_pred, y)
+    if t % 100 == 99:
+        print(t, loss.item())
+
+    # Before the backward pass, use the optimizer object to zero all of
+    # the gradients for the variables it will update
+    # (which are the learnable weights of the model).
+    # This is because by default, gradients are accumulated in buffers
+    # ( i.e, not overwritten) whenever .backward() is called.
+    optimizer.zero_grad()
+
+    # Backward pass: compute gradient of the loss with respect to model
+    # parameters
+    loss.backward()
+
+    # Calling the step function on an Optimizer makes an update to its
+    # parameters
+    optimizer.step()
+
+
 for fname in files_train:
     # Read in the data files
     file = os.path.join(data_dir, fname)
