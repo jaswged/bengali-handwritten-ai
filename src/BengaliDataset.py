@@ -24,7 +24,10 @@ class BengaliDataset(Dataset):
     def __getitem__(self, idx):
         img = self.df.iloc[idx][0:].values.astype(np.uint8)
         img = img.reshape(self.img_height, self.img_width)
+
+        # Invert the colors of the image.
         img = 255 - img
+        # Crop and resize the image
         img = self.crop_resize(img)
         img = img[:, :, np.newaxis]
 
@@ -52,12 +55,12 @@ class BengaliDataset(Dataset):
 
         # remove lo intensity pixels as noise. 28 is cutoff
         img[img < 28] = 0
-        length_X, length_Y = xmax - xmin, ymax - ymin
-        length = max(length_X, length_Y) + pad
+        length_x, length_y = xmax - xmin, ymax - ymin
+        length = max(length_x, length_y) + pad
 
         # make sure that the aspect ratio is kept in rescaling
-        img = np.pad(img, [((length - length_Y) // 2,),
-                           ((length - length_X) // 2,)], mode='constant')
+        img = np.pad(img, [((length - length_y) // 2,),
+                           ((length - length_x) // 2,)], mode='constant')
         return cv2.resize(img, (size, size))
 
     def save_images(self, output_file):
