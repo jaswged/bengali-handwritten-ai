@@ -1,22 +1,11 @@
-import numpy as np
-
-# Pytorch
-import pandas as pd
 import torch
-from Utils import seed_everything
-from torch.utils.data import Dataset
-import torch.optim as optim
-import torch.nn.functional as F
-
-# utils
-import random
 import os
 import gc
-from tqdm import tqdm
-
+import pandas as pd
+import numpy as np
 from BengaliDataset import BengaliDataset
 from Resnet import ResNet
-
+from Utils import seed_everything
 
 # Constants
 # Setting
@@ -26,23 +15,25 @@ HEIGHT = 137
 WIDTH = 236
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
-# Call seed to setup for repeatable results
 seed_everything(SEED)
 
 # Create Model
 model = ResNet().to(device)
+model_path = '../input/resnet18/resnet_saved_weights.pth'
 
-# Setup data files to load
+# load model from dict to create test output csv
+model.load_state_dict(torch.load(model_path))
+
+# Get Parquet files for Testing
 data_dir = '../input/bengaliai-cv19'
-files_train = [f'train_image_data_{fid}.parquet' for fid in range(4)]
+files_test = [f'test_image_data_{fid}.parquet' for fid in range(4)]
 
 # Predict Test values
 model.eval()
 row_id = []
 target = []
 
-# Do training here
-for fname in files_train:
+for fname in files_test:
     # Read in the data files
     file = os.path.join(data_dir, fname)
     print(F"File name is {file}")
@@ -76,3 +67,16 @@ for fname in files_train:
 
     del (df_test, test_image, test_loader)
     gc.collect()
+
+# Create csv file to submit to competition
+df_submission = pd.DataFrame(
+    {
+        'row_id': row_id,
+        'target': np.array(target)
+    },
+    columns=['row_id', 'target']
+)
+
+df_submission.to_csv('submission.csv', index=False)
+
+df_submission.head(10)
