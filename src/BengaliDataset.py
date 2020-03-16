@@ -4,9 +4,6 @@ import numpy as np
 import torch
 from torch.utils.data import Dataset
 import cv2
-
-
-# DataSet creator
 from tqdm import tqdm
 
 
@@ -83,3 +80,22 @@ class BengaliDataset(Dataset):
                 x2_tot.append(((img / 255.0) ** 2).mean())
                 img = cv2.imencode('.png', img)[1]
                 img_out.writestr(name + '.png', img)
+
+
+class BenDataset(Dataset):
+    def __init__(self, img_height, img_width):
+        self.dataset = []
+        self.img_height = img_height
+        self.img_width = img_width
+        self.HEIGHT = 137
+        self.WIDTH = 236
+
+    def __len__(self):
+        return len(self.dataset)
+
+    def __getitem__(self, idx):
+        return self.dataset[idx]
+
+    def add_BengaliDataset(self, bdg:BengaliDataset):
+        for i in range(len(bdg)):
+            self.dataset.append(bdg.__getitem__(i))

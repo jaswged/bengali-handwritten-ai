@@ -14,7 +14,7 @@ import os
 import gc
 from tqdm import tqdm
 
-from BengaliDataset import BengaliDataset
+from BengaliDataset import BengaliDataset, BenDataset
 from Resnet import ResNet
 
 
@@ -40,15 +40,19 @@ files_train = [f'train_image_data_{fid}.parquet' for fid in range(4)]
 model.eval()
 row_id = []
 target = []
+dataset = BenDataset(HEIGHT, WIDTH)
 
-# Do training here
-parquet_df0 = pd.read_parquet('../data/train_image_data_0.parquet',
-                              engine='pyarrow')
-print(parquet_df0.shape)
+for i in range(4):
+    # Do training here
+    parquet_df = pd.read_parquet(F'../data/train_image_data_{i}.parquet',
+                                  engine='pyarrow')
+    print(parquet_df.shape)
 
-# Get image dataset from train df
-train_images = BengaliDataset(parquet_df0, img_height=HEIGHT,
-                              img_width=WIDTH)
+    # Get image dataset from train df
+    train_images = BengaliDataset(parquet_df, img_height=HEIGHT,
+                                  img_width=WIDTH)
+
+    dataset.add_BengaliDataset(train_images)
 
 # Define loss function
 loss_fn = torch.nn.MSELoss(reduction='sum')
