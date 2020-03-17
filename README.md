@@ -33,6 +33,8 @@ The data is contained in parquet files, which are a columnar store where each pi
 So each "row" is a separate image. 
 White is 255 and black is 0.
 
+The first step is to bring in the images to a dataset and crop/resize them in the process to shrink the file size usage.
+
 ## Results
 I only found out about the competition with 5 days left, so I wsa not able to finish it in time to officially submit.
 
