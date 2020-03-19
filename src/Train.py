@@ -48,6 +48,9 @@ for i in range(4):
                                   engine='pyarrow')
     print(parquet_df.shape)
 
+    # shuffle the dataset
+    parquet_df = parquet_df.sample(frac=1).reset_index(drop=True)
+
     # Get image dataset from train df
     train_images = BengaliDataset(parquet_df, img_height=HEIGHT,
                                   img_width=WIDTH)
